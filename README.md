@@ -59,13 +59,43 @@ But other operators and statements also trigger coercion, like +, -, if, while t
 It’s not black magic. It’s described in the EcmaScript spec (which is a lot more clear than I had feared), and even V8 code is extremely legible.
 
 ### What triggers type coercion?
-Common cases are == (aka double equals, or “Abstract equality”), <, > <=, >=, if (), +, - .. But basically any operation / statement that clearly expects some type will probably go for coercion, and either give you ok, some really weird results (meaning the coercion almost worked), or an error (coercion failed miserably enough).
+Common cases are `==` (aka double equals, or “Abstract equality”), `<`, `>` `<=`, `>=`, `if ()`, `+`, `-`, .. But basically any operation or statement that clearly expects some type will probably go for coercion, and either give you ok, some really weird results (meaning the coercion almost worked), or an error (coercion failed miserably enough).
 
-== is the most complicated one, so we might as well tackle that first.
+`==` is the most complicated one, so we might as well tackle that first.
+
+### Abstract Equality (double equals, ==)
+
+(
+
+## Workarounds for unwanted type coercion
+### Explicit type casting (recommended)
+
+The syntax should be self-evident from the code.
+
+    x = String(10);             // ’10’
+    x = Boolean(0)              // false
+    x = Boolean(1)              // true
+    x = Number(’19’)            // 19
+
+### Checking for strict equality (===), sometimes recommended
+Checking for strict equality checks that both the type and value match. So
+
+    1 === '1'                                     // false
+    1 === 1                                       // true
+    1 === {valueOf: function() { return 1; } }    // false
+    1 === true                                    // false
+
+compared to
+
+    1 == '1'                                     // true
+    1 == 1                                       // true
+    1 == {valueOf: function() { return 1; } }    // true
+    1 == true                                    // true
+
+Most of the time, this is what we want. But sometimes type coercion is practical.
 
 
-## Workarounds
-#### implicit type casting (not recommended)
+### implicit type casting (not recommended should be understood)
 
 This is mostly useful for reading code “in the wild”. I prefer explicit casting just because it’s more understandable to people who aren’t familiar with all JS details, and makes very clear when we want a value of a certain type.
 
@@ -93,23 +123,15 @@ but watch out..
     !![]                    // true
     !!””                    // false
 
-Implicit conversion of objects needs use of overwriting inbuilt valueOf or toString functions.
+Implicit conversion of objects needs use of overwriting inbuilt `valueOf` or `toString` functions.
 for ex.
 
     10 * {}                                           // NaN
     10 * { valueOf: function() { return 7; }}         // 70
     10 * { toString: function() { return “7”; }}      // 70
 
-toString and valueOf are important for evaluation of objects, and have their uses in object evaluation, but more on these another time.
+`toString` and `valueOf` are important for evaluation of objects, and have their uses in object evaluation, but more on these another time.
 
-Workarounds - explicit type casting (recommended)
-——————————————————————————
-This is really self-evident from the code
-
-    x = String(10);             // ’10’
-    x = Boolean(0)              // false
-    x = Boolean(1)              // true
-    x = Number(’19’)            // 19
 
 
 
